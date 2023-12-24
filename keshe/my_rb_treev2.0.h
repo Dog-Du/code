@@ -4,6 +4,10 @@
 #include <ext/aligned_buffer.h>
 #include <bits/stl_construct.h>
 
+
+//相比于第一版本，在rb_tree_node_base中新增了
+// node_count表示当前子树的大小，可以支持log(n)时间 get_val和 get_rank，然后AC洛谷P3369
+
 //以老版本为主，新版本在语法上借鉴吧。
 namespace my_rb_tree
 {
@@ -11,6 +15,7 @@ namespace my_rb_tree
 const bool RED=true;
 const bool BLACK=false;
 
+//先对红黑树进行声明，后面友元要用
 template<typename Key,typename Value,typename KeyOfValue,typename Compare>
 class Rb_tree;
 
@@ -19,6 +24,7 @@ class Rb_tree;
 struct rb_tree_node_base
 {
     typedef rb_tree_node_base* base_ptr;
+    typedef unsigned long long size_t;
     //---const暂时不知道有啥用
     typedef const rb_tree_node_base* const_base_ptr;
 
@@ -28,6 +34,9 @@ struct rb_tree_node_base
     base_ptr parent;
     base_ptr left;
     base_ptr right;
+    size_t node_count; 
+
+    rb_tree_node_base():node_count(1){}
 
     ////TODO:新版C++stl标准增加了const类型的，暂时不知道有什么用
     static base_ptr get_min(base_ptr x)
@@ -49,9 +58,10 @@ struct rb_tree_node:public rb_tree_node_base
 {
     typedef rb_tree_node<Value>* Link_type;//指针类型
     Value value;    //节点值,新标准中用另一种方式存储
-    rb_tree_node(){}
+    rb_tree_node(){this->node_count=1;}
+
     //因为对于const类型不能修改，只能在这里列表初始化。
-    rb_tree_node(const Value&v):value(std::move(v)){}
+    rb_tree_node(const Value&v):value(v){this->node_count=1;}
 };
 
 ////TODO:这里对齐新版本，删除了父类。
@@ -148,10 +158,11 @@ protected:
 
     base_ptr M_node;//指针
 
+//比起第一版本，这里改成了get_M_node函数获取，更加统一。
 template<typename Key,typename V,typename KeyOfValue,typename Compare>
-friend  typename Rb_tree<Key,V,KeyOfValue,Compare>::iterator
-Rb_tree<Key,V,KeyOfValue,Compare>::
-erase(typename Rb_tree<Key,V,KeyOfValue,Compare>::iterator position);
+friend  typename Rb_tree<Key,V,KeyOfValue,Compare>::Base_ptr&
+        Rb_tree<Key,V,KeyOfValue,Compare>::
+    get_M_node(typename Rb_tree<Key,V,KeyOfValue,Compare>::iterator& p);
 
 public:
     rb_tree_iterator() {} //noexcept //noexpect()表示()中如果为true则必然无异常,编译器不会再对其检查
@@ -303,6 +314,14 @@ public:
     // }
 };
 
+inline void
+update_node_count(rb_tree_node_base*x)
+{
+    if(x==nullptr)return;
+    x->node_count=1;
+    x->node_count+=(x->left==nullptr?0:x->left->node_count);
+    x->node_count+=(x->right==nullptr?0:x->right->node_count);
+}
 
 //------全局函数，左右旋--------//
 
@@ -333,6 +352,8 @@ rb_tree_rotate_left(rb_tree_node_base*x,rb_tree_node_base*&root)
     
     y->left=x;
     x->parent=y;
+
+    update_node_count(x),update_node_count(y);//先更新x在更新y，下面同理
 }
 
 //右旋，必有左孩子
@@ -354,6 +375,8 @@ rb_tree_rotate_right(rb_tree_node_base*x,rb_tree_node_base*&root)
     
     y->right=x;
     x->parent=y;
+
+    update_node_count(x),update_node_count(y);
 }
 
 //---------全局函数，红黑树的Rebalance，解决双红和双黑问题------//
@@ -370,6 +393,7 @@ rb_tree_rebalance_for_insert(rb_tree_node_base*x,rb_tree_node_base*&root)
     //站在祖父考虑问题。
     while(x!=root&&parent->color==RED)
     {
+        update_node_count(parent);
         //左型
         if(parent==grandparent->left)
         {
@@ -384,6 +408,7 @@ rb_tree_rebalance_for_insert(rb_tree_node_base*x,rb_tree_node_base*&root)
                 grandparent->color=RED;
                 x=grandparent;
                 //需要继续检查
+                update_node_count(x);
             }
             //左双红
             //策略：分两种LL红和LR红，LR红需要先左旋
@@ -416,6 +441,8 @@ rb_tree_rebalance_for_insert(rb_tree_node_base*x,rb_tree_node_base*&root)
                 y->color=parent->color=BLACK;
                 grandparent->color=RED;
                 x=grandparent;
+
+                update_node_count(x);
             }   
             else
             {
@@ -433,10 +460,16 @@ rb_tree_rebalance_for_insert(rb_tree_node_base*x,rb_tree_node_base*&root)
 
         }
 
+        //应该放在while循环在下面，
         parent=x->parent;
         grandparent=parent->parent;
     }
 
+    
+    while(parent!=root)
+        update_node_count(parent),parent=parent->parent;
+    
+    update_node_count(root);
     root->color=BLACK;
 }
 
@@ -465,6 +498,7 @@ rb_tree_rebalance_for_erase(rb_tree_node_base*z,
         x=y->right;
     }
 
+    //p=y;//指向后继。
 
     ////TODO:老版本没有move函数，所以没有进行值替代，而是进行的指针替代
     //这里为了方便进行值替代
@@ -488,7 +522,6 @@ rb_tree_rebalance_for_erase(rb_tree_node_base*z,
         else
             x_parent=y;
         
-
         //把z摘下来，y放上去。
         if(root==z)
             root=y;
@@ -499,6 +532,7 @@ rb_tree_rebalance_for_erase(rb_tree_node_base*z,
         
         y->parent=z->parent;
         std::swap(y->color,z->color);
+
         y=z;
         // __y now points to node to be actually deleted
     }
@@ -506,6 +540,7 @@ rb_tree_rebalance_for_erase(rb_tree_node_base*z,
     {
         x_parent=y->parent;
         if(x!=nullptr)x->parent=y->parent;
+        
 
         if(root==z)
             root=x;
@@ -537,6 +572,8 @@ rb_tree_rebalance_for_erase(rb_tree_node_base*z,
 
         while(x!=root&&(x==nullptr||x->color==BLACK))
         {
+            update_node_count(x_parent);//应该更新父亲，因为x可能为空，而且x也不需要
+
             if(x==x_parent->left)
             {
                 brother=x_parent->right;
@@ -583,7 +620,6 @@ rb_tree_rebalance_for_erase(rb_tree_node_base*z,
                         brother=x_parent->right;
                     }
 
-                    
                     brother->color=x_parent->color;
                     x_parent->color=BLACK;
 
@@ -638,6 +674,10 @@ rb_tree_rebalance_for_erase(rb_tree_node_base*z,
         if(x!=nullptr)x->color=BLACK;//应该放在while外面，可以排除继任节点是红色
     }
 
+    while(x_parent!=root)
+        update_node_count(x_parent),x_parent=x_parent->parent;
+    
+    update_node_count(root);
     return y;//返回y，y是待删除节点，这个应该是来删除的（为什么不直接在这里删除？）
 }
 
@@ -698,8 +738,7 @@ protected:
 
     Link_type M_clone_node(Link_type x)
     {
-        Link_type tmp=new Rb_tree_node;
-        tmp->value=x->value;
+        Link_type tmp=new Rb_tree_node(x->value);
         tmp->color=x->color;
         tmp->left=tmp->right=nullptr;
         return tmp;
@@ -747,9 +786,10 @@ protected:
     static const Key& S_key(Link_type x){
         return KeyOfValue()(S_value(x));
     }
-    static bool& S_color(Link_type x){
-        return (bool&)(x->color);
-    }
+
+    // static bool& S_color(Link_type x){
+    //     return (bool&)(x->color);
+    // }
 
   static Link_type& S_left(Base_ptr __x)
     { return (Link_type&)(__x->left); }
@@ -772,20 +812,15 @@ protected:
 
 
 public:
-    //iterator
     typedef rb_tree_iterator<value_type> iterator;
-
-    //friend typename iterator::base_ptr iterator::get_M_node();
 
 private:
     iterator M_insert(Base_ptr x,Base_ptr y,const value_type& v);
     Link_type M_copy(Link_type x,Link_type p);
     void M_erase(Link_type x);
 
-    // iterator::base_ptr get_M_node(iterator& p)
-    // {
-    //     return p.M_node;
-    // }
+    Base_ptr& get_M_node(iterator& p)
+    {return p.M_node;}
 
 public:
     Rb_tree():
@@ -878,6 +913,11 @@ public:
     size_type count(const key_type&x)const;
     iterator lower_bound(const key_type&x);
     iterator upper_bound(const key_type&x);
+    //由值获得排名
+    size_type get_rank(const key_type&x);
+    //由排名获得值（迭代器）
+    iterator get_val(size_t x);
+
     std::pair<iterator,iterator> equal_range(const key_type&x);
 
     bool __rb_verify();//debugging
@@ -1130,11 +1170,11 @@ erase(iterator position)
     iterator successor=position;
     ++successor;
     rb_tree_node_base* y=rb_tree_rebalance_for_erase(
-                                        position.M_node,
-                                        this->M_header->parent,
-                                        this->M_header->left,
-                                        this->M_header->right
-                                            );
+                                            get_M_node(position),
+                                            this->M_header->parent,
+                                            this->M_header->left,
+                                            this->M_header->right
+                                                );
     destory_node((Link_type)y);
     --M_node_count;
     return successor;
@@ -1161,18 +1201,18 @@ M_copy(Link_type x,Link_type p)//拷贝一个子树。使用递归算法。
 
     try
     {
-        if(x->M_right!=nullptr)
-            top->M_right=M_copy(S_right(x),top);//递归
+        if(x->right!=nullptr)
+            top->right=M_copy(S_right(x),top);//递归
         p=top;
         x=S_left(x);
 
         while(x!=nullptr)
         {
             Link_type y=M_clone_node(x);
-            p->M_left=y;
-            y->M_parent=p;
-            if(x->M_right!=nullptr)
-                y->M_right=M_copy(S_right(x),y);
+            p->left=y;
+            y->parent=p;
+            if(x->right!=nullptr)
+                y->right=M_copy(S_right(x),y);
 
             p=y;
             x=S_left(x);
@@ -1208,7 +1248,7 @@ erase(iterator first,iterator last)
 template<typename Key,typename Value,typename KeyOfValue,typename Compare>
 typename Rb_tree<Key,Value,KeyOfValue,Compare>::iterator
 Rb_tree<Key,Value,KeyOfValue,Compare>::
-find(const Key&k)
+find(const key_type&k)
 {
     Link_type y=this->M_header,x=M_root();//y是last node while is not less than k
 
@@ -1275,6 +1315,51 @@ upper_bound(const Key&k)
 }
 
 template<typename Key,typename Value,typename KeyOfValue,typename Compare>
+typename Rb_tree<Key,Value,KeyOfValue,Compare>::iterator
+Rb_tree<Key,Value,KeyOfValue,Compare>::
+get_val(size_t x)
+{
+    Link_type y=M_root();
+
+    while (y!=nullptr)
+    {
+        if( (y->left==nullptr?0:y->left->node_count)+1 == x)
+            break;
+        else if( (y->left==nullptr?0:y->left->node_count) >= x)
+            y=S_left(y);
+        else
+        {
+            x-= (y->left==nullptr?0:y->left->node_count) +1;
+            y=S_right(y);
+        }
+    }
+    
+    return y==nullptr?end():iterator(y);
+}
+
+template<typename Key,typename Value,typename KeyOfValue,typename Compare>
+typename Rb_tree<Key,Value,KeyOfValue,Compare>::size_type
+Rb_tree<Key,Value,KeyOfValue,Compare>::
+get_rank(const key_type&x)
+{
+    Link_type y=M_root();
+    size_type rank=1;
+
+    while(y!=nullptr)
+    {
+        if(!M_key_compare(S_key(y),x))//x<=S_key(y)
+            y=S_left(y);
+        else
+        {
+            rank+=(y->left==nullptr?0:y->left->node_count)+1;
+            y=S_right(y);
+        }
+    }
+
+    return rank;
+}
+
+template<typename Key,typename Value,typename KeyOfValue,typename Compare>
 std::pair<typename Rb_tree<Key,Value,KeyOfValue,Compare>::iterator,typename Rb_tree<Key,Value,KeyOfValue,Compare>::iterator>
 Rb_tree<Key,Value,KeyOfValue,Compare>::
 equal_range(const Key&k)
@@ -1295,6 +1380,7 @@ inline int black_count(rb_tree_node_base*node,rb_tree_node_base*root)
             return bc+black_count(node->parent,root);
     }
 }
+
 
 template<typename Key,typename Value,typename KeyOfValue,typename Compare>
 bool
