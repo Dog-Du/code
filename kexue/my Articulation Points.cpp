@@ -117,14 +117,14 @@ void read_data_by_file(string &filename,MyGraph::my_graph &graph,int&query)
 void read_data_by_input(MyGraph::my_graph&graph,int&query)
 {
     int n, m; // 顶点数和边数
-    cout << "请输入顶点数和边数：" << endl;
+    cout << "please input point number and edge number :" << endl;
     cin >> n >> m;
 
     // 初始化图
     MyGraph::my_graph new_graph(n);
 
     // 读入图的边信息
-    cout << "请输入每条边的起点和终点：" << endl;
+    cout << "please input the two ends of every edge :" << endl;
     for (int i = 0; i < m; ++i)
     {
         int x, y;
@@ -137,7 +137,7 @@ void read_data_by_input(MyGraph::my_graph&graph,int&query)
     graph = new_graph;
 
     // 读入查询次数
-    cout << "请输入查询次数：" << endl;
+    cout << "please input how many do you want to query :" << endl;
     cin >> query;
 }
 
@@ -154,6 +154,7 @@ void modify(int x,MyGraph::my_graph& graph,vector<int> around[])
 void solve()
 {
     char op;
+    cout<<"please input how do you want to input :(H is hand and F is file)"<<endl;
     cin>>op;
 
     MyGraph::my_graph graph(0);
@@ -173,11 +174,19 @@ void solve()
 
     //获得结果。res里面全都是割点
     set<int> res;
-    vector<int> around[graph.getvnum()+1];//
-    Tarjan(graph,res,around);
+    vector<int> around[graph.getvnum()+1];//保存父亲和孩子，用于modify函数
+    Tarjan(graph,res,around);//先初始化
+
+    cout<< "let's start to query :"<<endl;
 
     while(query--)
     {
+        cout<<endl;
+        cout<<"Q is querying one point whether is key point or not"<<endl;
+        cout<<"S is outputting all key points"<<endl;
+        cout<<"M is modifying a key point to a not key point"<<endl;
+        cout<<endl;
+
         cin>>op;
         int x;
 
@@ -185,7 +194,7 @@ void solve()
         {
             cin>>x;
 
-            cout<< x << "is" << (res.count(x)?"":"not") << "key point" <<endl;
+            cout<< x << " is " << (res.count(x)?"":"not") << " key point" <<endl;
         }
         else if(op=='S')//输出所有割点
         {
