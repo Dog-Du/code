@@ -1,0 +1,87 @@
+    
+我有个问题，怎么支持一个操作：
+给定k，对区间[l,r]进行修改，改成k与数字的较小者。询问时询问[l,r]中的最小值
+
+这串代码解决了单点查询，区间查询需要一个tag。这个类似于区间推平
+
+    const int maxn=1e4+10;
+    int t[maxn<<2];
+
+    void pushup(int x)
+    {
+        t[x]=max(t[x<<1],t[x<<1|1]);//注意一定是max，不然会被污染
+    }
+
+    void pushdown(int x)
+    {
+        t[x<<1]=min(t[x<<1],t[x]);
+        t[x<<1|1]=min(t[x<<1|1],t[x]);
+    }
+
+    void build(int x,int l,int r)
+    {
+        t[x]=1e9;
+
+        if(l==r)
+        {
+            if(l==0)t[x]=0;
+            else
+                t[x]=1e9;
+            return;
+        }
+
+        int mid=l+r>>1;
+
+        build(x<<1,l,mid);
+        build(x<<1|1,mid+1,r);
+
+        pushup(x);
+    }
+
+    void modify(int x,int l,int r,int L,int R,int k)
+    {
+        if(l>=L&&r<=R)
+        {
+            t[x]=min(t[x],k);
+            return;
+        }
+
+        pushdown(x);
+        
+        int mid=l+r>>1;
+
+        if(mid>=L)modify(x<<1,l,mid,L,R,k);
+        if(mid<R)modify(x<<1|1,mid+1,r,L,R,k);
+
+        pushup(x);
+    }
+
+    int query(int x,int l,int r,int dist)//单点查询，不需要tag标记
+    {
+        if(l==r)return t[x];
+        int mid=l+r>>1;
+
+        pushdown(x);
+
+        if(mid>=dist)return query(x<<1,l,mid,dist);
+        else return query(x<<1|1,mid+1,r,dist);
+    }
+
+    int jump(vector<int>& nums) {
+        int length=nums.size();
+      //  vector<int> dp(length+1,(int)1e5+10);
+
+        build(1,0,length-1);
+
+        for(int i=0;i<length;++i)
+        {
+            modify(1,0,length-1,i,i+nums[i],query(1,0,length-1,i)+1);
+
+            // for(int i=0;i<length;++i)
+            //     cout<<query(1,0,length-1,i)<<' ';
+            // cout<<endl;
+        }
+
+        return query(1,0,length-1,length-1);
+    }
+};
