@@ -23,7 +23,7 @@ namespace MyGraph
         my_graph(size_t x):arcnum(0){graph.resize(x+1);}
         ~my_graph(){graph.clear();arcnum=0;}
 
-        set<size_t>& get_arc(size_t x){return graph[x];}
+        const set<size_t>& get_arc(size_t x){return graph[x];}
         
         void resize(size_t x){graph.resize(x+1);}
         size_t getvnum(){return graph.size()-1;}

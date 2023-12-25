@@ -107,8 +107,12 @@ public:
                 return M_t.equal_range(x);
         }
 
-        bool operator==(const map<Key,Tp,Compare>&x){
-                return x.M_t==M_t;
+        bool operator == (const map<Key,Tp,Compare>&x){
+                return x.M_t==this->M_t;
+        }
+
+        bool operator != (map<Key,Tp,Compare>&x){
+                return !(x.M_t==this->M_t);
         }
 };
 

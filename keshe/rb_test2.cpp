@@ -40,10 +40,15 @@ int main()
         str[i]=s;
 
         //插入时返回一个pair，第一个元素是迭代器，第二个元素是是否插入成功。
-        pair<my_map::map<string,int>::iterator,bool> iter_pair=mp.insert({s,i});
-        my_map::map<string,int>::iterator iter=iter_pair.first;
-        cout<< (iter_pair.second?"success":"fail") <<endl;
-        cout<< iter->first << ' ' << iter->second <<endl;
+        //重载了[]符号，所以也可以使用[]进行插入或者查询
+        mp[str[i]]=i;
+        my_map::map<string,int>::iterator iter=mp.find(s);
+
+       // pair<my_map::map<string,int>::iterator,bool> iter_pair=mp.insert({str[i],i});
+        cout<<str[i]<<endl;
+       // my_map::map<string,int>::iterator iter=iter_pair.first;
+       // cout<< (iter_pair.second?"success":"fail") <<endl;
+        //cout<< iter->first << ' ' << iter->second <<endl;
     }
 
     cout<<endl;

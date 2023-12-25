@@ -149,10 +149,10 @@ protected:
     base_ptr M_node;//指针
 
 template<typename Key,typename V,typename KeyOfValue,typename Compare>
-friend  typename Rb_tree<Key,V,KeyOfValue,Compare>::iterator
-Rb_tree<Key,V,KeyOfValue,Compare>::
-erase(typename Rb_tree<Key,V,KeyOfValue,Compare>::iterator position);
-
+friend  typename Rb_tree<Key,V,KeyOfValue,Compare>::Base_ptr&
+        Rb_tree<Key,V,KeyOfValue,Compare>::
+    get_M_node(typename Rb_tree<Key,V,KeyOfValue,Compare>::iterator& p);
+    
 public:
     rb_tree_iterator() {} //noexcept //noexpect()表示()中如果为true则必然无异常,编译器不会再对其检查
 
@@ -781,6 +781,8 @@ private:
     Link_type M_copy(Link_type x,Link_type p);
     void M_erase(Link_type x);
 
+    Base_ptr& get_M_node(iterator&p)
+    {return p.M_node;}
     // iterator::base_ptr get_M_node(iterator& p)
     // {
     //     return p.M_node;
@@ -831,8 +833,8 @@ private:
 
 public:
     Compare key_comp() const {return M_key_compare;}
-    iterator begin() {return iterator(M_leftmost());}
-    iterator end() {return iterator(this->M_header);}
+    iterator begin()const {return iterator(M_leftmost());}
+    iterator end()const {return iterator(this->M_header);}
 
     bool empty()const {return M_node_count==0;}
     size_type size()const {return M_node_count;}
@@ -882,13 +884,30 @@ public:
     bool __rb_verify();//debugging
 
     //这个放在里面，后面一个放在里面,
-    bool operator==(const RB_Self&x)
+    // template<typename K1,typename V1,typename T1,typename C1>
+    // friend bool
+    // operator == (const Rb_tree<K1,V1,T1,C1>&x,const Rb_tree<K1,V1,T1,C1>&y);
+
+    
+    bool operator==(const RB_Self&x)const
     {
         return size()==x.size()&&
             std::equal(begin(),end(),x.begin());
     }
-
 };
+
+// template<typename Key,typename Value,typename KeyOfValue,typename Compare>
+// inline bool operator ==(const Rb_tree<Key,Value,KeyOfValue,Compare>&x,const Rb_tree<Key,Value,KeyOfValue,Compare>&y)
+// {return x.size()==y.size()&&
+//         std::equal(x.begin(),x.end(),y.begin());}
+
+// template<typename K1,typename V1,typename T1,typename C1>
+// bool
+// operator == (const Rb_tree<K1,V1,T1,C1>&x,const Rb_tree<K1,V1,T1,C1>&y)
+// {
+//     return x.size()==y.size()&&
+//         equal(x.begin(),x.end(),y.begin());
+// }
 
 //类外定义函数：：：：方法
 template<typename Key,typename Value,typename KeyOfValue,typename Compare>
@@ -1045,17 +1064,17 @@ typename Rb_tree<Key,Value,KeyOfValue,Compare>::iterator
 Rb_tree<Key,Value,KeyOfValue,Compare>::
 insert_unique(iterator position,const Value&v)
 {
-    if(position.M_node==this->M_header->left)//begin（）
+    if(get_M_node(position)==this->M_header->left)//begin（）
     {
         if(size()>0&&
-            M_key_compare(KeyOfValue()(v),S_key(position.M_node)))
+            M_key_compare(KeyOfValue()(v),S_key(get_M_node(position))))
         {
-            return M_insert(position.M_node,position.M_node,v);
+            return M_insert(get_M_node(position),get_M_node(position),v);
         }
         else
             return insert_unique(v).first;
     }
-    else if(position.M_node==this->M_header)
+    else if(get_M_node(position)==this->M_header)
     {
         if(M_key_compare(S_key(M_rightmost()),KeyOfValue()(v)))
         {
@@ -1070,13 +1089,13 @@ insert_unique(iterator position,const Value&v)
         --before;
 
         //在before和position之间
-        if(M_key_compare(S_key(before.M_node),KeyOfValue()(v))&&
-            M_key_compare(KeyOfValue()(v),S_key(position.M_node)))
+        if(M_key_compare(S_key(get_M_node(before)),KeyOfValue()(v))&&
+            M_key_compare(KeyOfValue()(v),S_key(get_M_node(position))))
         {
-            if(S_right(before.M_node)==nullptr)
-                return M_insert(nullptr,before.M_node,v);
+            if(S_right(get_M_node(before))==nullptr)
+                return M_insert(nullptr,get_M_node(before),v);
             else
-                return M_insert(position.M_node,position.M_node,v);
+                return M_insert(get_M_node(position),get_M_node(position),v);
         }
         else
             return insert_unique(v).first;
@@ -1088,15 +1107,15 @@ typename Rb_tree<Key,Value,KeyOfValue,Compare>::iterator
 Rb_tree<Key,Value,KeyOfValue,Compare>::
 insert_equal(iterator position,const Value&v)
 {
-    if(position.M_node==this->M_header->left)
+    if(get_M_node(position)==this->M_header->left)
     {
         if(size()>0&&//position不大于v
-            !M_key_compare(S_key(position.M_node),KeyOfValue()(v)))
-            return M_insert(position.M_node,position.M_node,v);
+            !M_key_compare(S_key(get_M_node(position)),KeyOfValue()(v)))
+            return M_insert(get_M_node(position),get_M_node(position),v);
         else
             return insert_equal(v);
     }
-    else if(position.M_node==this->M_header)
+    else if(get_M_node(position)==this->M_header)
     {
         if(!M_key_compare(KeyOfValue()(v),S_key(M_rightmost())))
             return M_insert(nullptr,M_rightmost(),v);
@@ -1108,12 +1127,12 @@ insert_equal(iterator position,const Value&v)
         iterator before=position;
         --before;
 
-        if(!M_key_compare(KeyOfValue()(v),S_key(before.M_node))&&
-            !M_key_compare(S_key(position.M_node),KeyOfValue()(v)))
-            if(S_right(before.M_node)==nullptr)
-                return M_insert(nullptr,before.M_node,v);
+        if(!M_key_compare(KeyOfValue()(v),S_key(get_M_node(before)))&&
+            !M_key_compare(S_key(get_M_node(position)),KeyOfValue()(v)))
+            if(S_right(get_M_node(before))==nullptr)
+                return M_insert(nullptr,get_M_node(before),v);
             else
-                return M_insert(position.M_node,position.M_node,v);
+                return M_insert(get_M_node(position),get_M_node(position),v);
         else
             return insert_equal(v);
     }
@@ -1129,7 +1148,7 @@ erase(iterator position)
     iterator successor=position;
     ++successor;
     rb_tree_node_base* y=rb_tree_rebalance_for_erase(
-                                        position.M_node,
+                                        get_M_node(position),
                                         this->M_header->parent,
                                         this->M_header->left,
                                         this->M_header->right
