@@ -78,7 +78,7 @@ void Tarjan(MyGraph::my_graph& graph,set<int>&key_point,vector<int> around[])
 }
 
 //通过文件输入
-void read_data_by_file(string &filename,MyGraph::my_graph &graph,int&query)
+void read_data_by_file(const string &filename,MyGraph::my_graph &graph,int&query)
 {
     // 打开文件
     ifstream infile(filename);

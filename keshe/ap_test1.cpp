@@ -10,6 +10,9 @@
 
 using namespace std;
 
+//可以通过洛谷P3369割点
+//https://www.luogu.com.cn/problem/P3388
+
 namespace MyGraph
 {
     class my_graph
@@ -153,79 +156,26 @@ void modify(int x,MyGraph::my_graph& graph,vector<int> around[])
 
 void solve()
 {
-    char op;
-    cout<<"please input how do you want to input :(H is hand and F is file)"<<endl;
-    cin>>op;
+    int n,m;
+    cin>>n>>m;
+    MyGraph::my_graph graph(n);
 
-    MyGraph::my_graph graph(0);
-
-    int query=0;//query为询问或者操作次数
-
-    //手写输入 graph数据
-    if(op=='H')
-        read_data_by_input(graph,query);
-    else
+    for(int i=1,x,y;i<=m;++i)
     {
-        // 通过文件输入graph数据，其他的还是手动输入 
-        string filename;
-        cin>>filename;
-        read_data_by_file(filename,graph,query);
+        cin>>x>>y;
+        graph.add_edge(x,y);
+        graph.add_edge(y,x);
     }
 
-    //获得结果。res里面全都是割点
     set<int> res;
-    vector<int> around[graph.getvnum()+1];//保存父亲和孩子，用于modify函数
-    Tarjan(graph,res,around);//先初始化
+    vector<int> around[n+1];
 
-    cout<< "let's start to query :"<<endl;
+    Tarjan(graph,res,around);
 
-    while(query--)
-    {
-        cout<<endl;
-        cout<<"Q is querying one point whether is key point or not"<<endl;
-        cout<<"S is outputting all key points"<<endl;
-        cout<<"M is modifying a key point to a not key point"<<endl;
-        cout<<endl;
+    cout<<res.size()<<'\n';
 
-        cin>>op;
-        int x;
-
-        if(op=='Q')//询问x点是不是割点
-        {
-            cin>>x;
-
-            cout<< (res.count(x)?"yes":"no")<<endl;
-        }
-        else if(op=='S')//输出所有割点
-        {
-            cout<<"the number of all key points is "<< res.size()<<" :"<<endl;
-            for(auto&it:res)
-                cout<<it<<' ';
-            cout<<endl;
-        }
-        else if(op=='M')// 把某个点修改成非割点
-        {
-            cin>>x;
-
-            //如果是，则修改
-            if(res.count(x))
-            {
-                modify(x,graph,around);
-
-                for(int i=0;i<=graph.getvnum();++i)
-                    around[i].clear();
-                
-                res.clear();
-                Tarjan(graph,res,around);
-                cout<< "modify finished"<<endl;
-            }
-            else//如果不是，不修改
-            {
-                cout<< "this point is not key point" <<endl;
-            }
-        }
-    }
-
+    for(auto &it:res)
+        cout<<it<<' ';
 }
 
 int main()

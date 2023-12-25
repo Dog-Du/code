@@ -888,7 +888,6 @@ public:
     // friend bool
     // operator == (const Rb_tree<K1,V1,T1,C1>&x,const Rb_tree<K1,V1,T1,C1>&y);
 
-    
     bool operator==(const RB_Self&x)const
     {
         return size()==x.size()&&

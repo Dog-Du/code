@@ -60,8 +60,8 @@ private:
 
 public:
        // bool verify(){return M_t.__rb_verify();}
-        iterator begin() {return M_t.begin();}
-        iterator end() {return M_t.end();}
+        iterator begin()const {return M_t.begin();}
+        iterator end() const {return M_t.end();}
         bool empty() const {return M_t.empty();}
         size_type size() const {return M_t.size();}
         size_type max_size() const {return M_t.max_size();}
@@ -106,8 +106,12 @@ public:
                 return M_t.equal_range(x);
         }
 
-        bool operator==(const multimap<Key,Tp,Compare>&x){
+        bool operator==(const multimap<Key,Tp,Compare>&x)const{
                 return x.M_t==M_t;
+        }
+
+        bool operator!=(const multimap<Key,Tp,Compare>&x)const{
+                return !(x.M_t==M_t);
         }
 };
 
