@@ -10,6 +10,7 @@
 
 using namespace std;
 
+//通过文件读入。
 namespace MyGraph
 {
     class my_graph
@@ -168,6 +169,7 @@ void solve()
     {
         // 通过文件输入graph数据，其他的还是手动输入 
         string filename;
+        cout<<"please give me the file path :"<<endl;
         cin>>filename;
         read_data_by_file(filename,graph,query);
     }

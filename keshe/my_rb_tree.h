@@ -392,9 +392,9 @@ rb_tree_rebalance_for_insert(rb_tree_node_base*x,rb_tree_node_base*&root)
             {
                 //LR型，先左旋
                 //这代码正确吗？
-            //if里面x=x->parent这个时候x的位置改变了啊，变成了父亲,抱歉，不该质疑
-            //左旋之前，x先移动到父亲，左旋之后x的位置又降下来了。
-            //所以每次旋转之后parent,grandparent都需要修改
+                //if里面x=x->parent这个时候x的位置改变了啊，变成了父亲,抱歉，不该质疑
+                //左旋之前，x先移动到父亲，左旋之后x的位置又降下来了。
+                //所以每次旋转之后parent,grandparent都需要修改
                 if(x==parent->right)
                 {
                     x=parent;
@@ -558,7 +558,6 @@ rb_tree_rebalance_for_erase(rb_tree_node_base*z,
 
                 //兄弟为黑，且孩子双黑，这个时候需要进一步调整，进入下一次循环。
                 //因为删去的节点为黑色，可以知道，左子树比右子树少了一个黑色路径。
-                
                 if((brother->left==nullptr||brother->left->color==BLACK)&&
                     (brother->right==nullptr||brother->right->color==BLACK))
                 {
@@ -1252,9 +1251,7 @@ Rb_tree<Key,Value,KeyOfValue,Compare>::
 count(const Key&k)const
 {
     std::pair<iterator,iterator> p=equal_range(k);
-    size_type n=0;
-    std::distance(p.first,p.second,n);
-    return n;
+    return std::distance(p.first,p.second);
 }
 
 template<typename Key,typename Value,typename KeyOfValue,typename Compare>

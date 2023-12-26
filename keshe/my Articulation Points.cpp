@@ -17,7 +17,7 @@ namespace MyGraph
     private:
         typedef unsigned long long size_t;
 
-        vector<set<size_t>> graph;//为了防止输入重复边，使用set
+        vector<set<size_t>> graph;//为了防止输入重复边，使用set.
         size_t arcnum;
     public:
         my_graph(size_t x):arcnum(0){graph.resize(x+1);}
@@ -34,7 +34,7 @@ namespace MyGraph
 
 void dfs(int now,MyGraph::my_graph&graph,int low[],int is_key[],set<int>&key_point,int dfn[],int &root,int &cnt,vector<int> around[])
 {
-    dfn[now]=low[now]=++cnt;
+    dfn[now]=low[now]=++cnt;//时间戳
     int son=0;
 
     for(auto&it:graph.get_arc(now))
@@ -44,6 +44,7 @@ void dfs(int now,MyGraph::my_graph&graph,int low[],int is_key[],set<int>&key_poi
             ++son;
             dfs(it,graph,low,is_key,key_point,dfn,root,cnt,around);
 
+            //补充around，为了modify
             around[now].push_back(it);
             around[it].push_back(now);
 
@@ -55,7 +56,7 @@ void dfs(int now,MyGraph::my_graph&graph,int low[],int is_key[],set<int>&key_poi
         else
             low[now]=min(low[now],dfn[it]);
     }
-
+    
     if(root==now&&son>=2&&is_key[now]==0)
         key_point.insert(now),is_key[now]=1;
 }
@@ -74,9 +75,8 @@ void Tarjan(MyGraph::my_graph& graph,set<int>&key_point,vector<int> around[])
             dfs(i,graph,low,is_key,key_point,dfn,root,cnt,around);
         }
     }
-
 }
-
+ 
 //通过文件输入
 void read_data_by_file(string &filename,MyGraph::my_graph &graph,int&query)
 {

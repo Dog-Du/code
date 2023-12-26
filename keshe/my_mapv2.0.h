@@ -82,6 +82,7 @@ public:
         {return M_t.insert_unique(position,x);}
 
         iterator erase(iterator position){return M_t.erase(position);}
+        
         size_type erase(const key_type&x){return M_t.erase(x);}
         iterator erase(iterator first,iterator second)
         {return  M_t.erase(first,second);}

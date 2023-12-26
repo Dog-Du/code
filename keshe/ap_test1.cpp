@@ -10,6 +10,8 @@
 
 using namespace std;
 
+//A类第十二题，无向图的关节点问题测试
+
 //可以通过洛谷P3369割点
 //https://www.luogu.com.cn/problem/P3388
 

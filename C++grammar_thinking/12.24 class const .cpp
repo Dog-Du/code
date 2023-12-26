@@ -25,7 +25,7 @@ public:
 
     void set(int x)
     {
-        a=x;
+        
     }
 };
 int main()

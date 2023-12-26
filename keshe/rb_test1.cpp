@@ -922,7 +922,7 @@ public:
     bool __rb_verify();//debugging
 
     //这个放在里面，后面一个放在里面,
-    bool operator==(const RB_Self&x)
+    bool operator==(const RB_Self&x)const
     {
         return size()==x.size()&&
             std::equal(begin(),end(),x.begin());
@@ -1082,17 +1082,17 @@ typename Rb_tree<Key,Value,KeyOfValue,Compare>::iterator
 Rb_tree<Key,Value,KeyOfValue,Compare>::
 insert_unique(iterator position,const Value&v)
 {
-    if(position.M_node==this->M_header->left)//begin（）
+    if(get_M_node(position)==this->M_header->left)//begin（）
     {
         if(size()>0&&
-            M_key_compare(KeyOfValue()(v),S_key(position.M_node)))
+            M_key_compare(KeyOfValue()(v),S_key(get_M_node(position))))
         {
-            return M_insert(position.M_node,position.M_node,v);
+            return M_insert(get_M_node(position),get_M_node(position),v);
         }
         else
             return insert_unique(v).first;
     }
-    else if(position.M_node==this->M_header)
+    else if(get_M_node(position)==this->M_header)
     {
         if(M_key_compare(S_key(M_rightmost()),KeyOfValue()(v)))
         {
@@ -1107,13 +1107,13 @@ insert_unique(iterator position,const Value&v)
         --before;
 
         //在before和position之间
-        if(M_key_compare(S_key(before.M_node),KeyOfValue()(v))&&
-            M_key_compare(KeyOfValue()(v),S_key(position.M_node)))
+        if(M_key_compare(S_key(get_M_node(before)),KeyOfValue()(v))&&
+            M_key_compare(KeyOfValue()(v),S_key(get_M_node(position))))
         {
-            if(S_right(before.M_node)==nullptr)
-                return M_insert(nullptr,before.M_node,v);
+            if(S_right(get_M_node(before))==nullptr)
+                return M_insert(nullptr,get_M_node(before),v);
             else
-                return M_insert(position.M_node,position.M_node,v);
+                return M_insert(get_M_node(position),get_M_node(position),v);
         }
         else
             return insert_unique(v).first;
@@ -1125,15 +1125,15 @@ typename Rb_tree<Key,Value,KeyOfValue,Compare>::iterator
 Rb_tree<Key,Value,KeyOfValue,Compare>::
 insert_equal(iterator position,const Value&v)
 {
-    if(position.M_node==this->M_header->left)
+    if(get_M_node(position)==this->M_header->left)
     {
         if(size()>0&&//position不大于v
-            !M_key_compare(S_key(position.M_node),KeyOfValue()(v)))
-            return M_insert(position.M_node,position.M_node,v);
+            !M_key_compare(S_key(get_M_node(position)),KeyOfValue()(v)))
+            return M_insert(get_M_node(position),get_M_node(position),v);
         else
             return insert_equal(v);
     }
-    else if(position.M_node==this->M_header)
+    else if(get_M_node(position)==this->M_header)
     {
         if(!M_key_compare(KeyOfValue()(v),S_key(M_rightmost())))
             return M_insert(nullptr,M_rightmost(),v);
@@ -1145,12 +1145,12 @@ insert_equal(iterator position,const Value&v)
         iterator before=position;
         --before;
 
-        if(!M_key_compare(KeyOfValue()(v),S_key(before.M_node))&&
-            !M_key_compare(S_key(position.M_node),KeyOfValue()(v)))
-            if(S_right(before.M_node)==nullptr)
-                return M_insert(nullptr,before.M_node,v);
+        if(!M_key_compare(KeyOfValue()(v),S_key(get_M_node(before)))&&
+            !M_key_compare(S_key(get_M_node(position)),KeyOfValue()(v)))
+            if(S_right(get_M_node(before))==nullptr)
+                return M_insert(nullptr,get_M_node(before),v);
             else
-                return M_insert(position.M_node,position.M_node,v);
+                return M_insert(get_M_node(before),get_M_node(before),v);
         else
             return insert_equal(v);
     }
@@ -1536,8 +1536,11 @@ public:
                 return M_t.equal_range(x);
         }
 
-        bool operator==(const multimap<Key,Tp,Compare>&x){
+        bool operator==(const multimap<Key,Tp,Compare>&x)const{
                 return x.M_t==M_t;
+        }
+        bool operator!=(const multimap<Key,Tp,Compare>&x)const{
+                return !(x.M_t==M_t);
         }
 };
 

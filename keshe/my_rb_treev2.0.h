@@ -912,7 +912,7 @@ public:
 
 public:
     iterator find(const key_type&x);
-    size_type count(const key_type&x)const;
+    size_type count(const key_type&x);
     iterator lower_bound(const key_type&x);
     iterator upper_bound(const key_type&x);
     //由值获得排名
@@ -1188,7 +1188,7 @@ Rb_tree<Key,Value,KeyOfValue,Compare>::
 erase(const Key&x)
 {
     std::pair<iterator,iterator> p=equal_range(x);
-    size_type n=std::distance(p.first,p.second);
+    size_type n=count(x);
     erase(p.first,p.second);
     return n;
 }
@@ -1274,12 +1274,10 @@ find(const key_type&k)
 template<typename Key,typename Value,typename KeyOfValue,typename Compare>
 typename Rb_tree<Key,Value,KeyOfValue,Compare>::size_type
 Rb_tree<Key,Value,KeyOfValue,Compare>::
-count(const Key&k)const
+count(const Key&k)
 {
     std::pair<iterator,iterator> p=equal_range(k);
-    size_type n=0;
-    std::distance(p.first,p.second,n);
-    return n;
+    return std::distance(p.first,p.second);
 }
 
 template<typename Key,typename Value,typename KeyOfValue,typename Compare>
