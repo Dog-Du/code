@@ -10,11 +10,12 @@
             "defines": [
                 "_DEBUG",
                 "UNICODE",
-                "_UNICODE"
+                "_UNICODE",
+                "LOCAL"
             ],
-            "compilerPath": "D:\\x86_64-8.1.0-release-posix-seh-rt_v6-rev0\\mingw64\\bin\\gcc.exe",
-            "cStandard": "c17",
-            "cppStandard": "gnu++14",
+            "compilerPath": "D:\\Program Files (x86)\\x86_64-13.2.0-release-win32-seh-msvcrt-rt_v11-rev1\\mingw64\\bin\\gcc.exe",
+            "cStandard": "c23",
+            "cppStandard": "c++23",
             "intelliSenseMode": "windows-gcc-x64"
         }
     ],

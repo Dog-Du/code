@@ -98,6 +98,7 @@ int main()
         query(1,1,n,l,r,k);
         cout<<ans<<'\n';
     }
+    
     cout<<endl;
     system("pause");
     return 0;

@@ -7,6 +7,7 @@
 //比如:operator==(const class& x)const 应该写成这样，避免无法传参
 //因为里层的也会写const，红黑树课设选择了这种写法，但是一般推荐使用的是全局方法似乎。
 
+//函数接口是const的话那么普通变量也可以传入。但是如果是普通变量的引用，那么const的接口无法传入。
 class myint{
 public:
     int a;

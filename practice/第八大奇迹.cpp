@@ -5,9 +5,9 @@ const int maxn=1e5+10;
 
 struct node{
 	int v[8]={0};
-}t[maxn<<2];//Ã¿¸ö½Úµã¼ÇÂ¼Õâ¸öÇø¼äµÄÇ°°Ë´ó 
+}t[maxn<<2];//Ã¿ï¿½ï¿½ï¿½Úµï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½Ë´ï¿½ 
 
-inline void pushup(node & x,node & l,node & r)//ÓÃ¹é²¢ÅÅÐòË¼ÏëºÏ²¢ 
+inline void pushup(node & x,node & l,node & r)//ï¿½Ã¹é²¢ï¿½ï¿½ï¿½ï¿½Ë¼ï¿½ï¿½Ï²ï¿½ 
 {
 	int p1=0,p2=0,p=0;
 	
@@ -66,7 +66,7 @@ int main()
 	}
 	return 0;
 }
-//ÓÅÏÈ¶ÓÁÐ 
+//ï¿½ï¿½ï¿½È¶ï¿½ï¿½ï¿½ 
 //using namespace std;
 //#include<iostream>
 //#include<queue>

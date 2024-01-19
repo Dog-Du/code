@@ -19,46 +19,49 @@ int main()
 
     my_map::map<string,int> mp,mp_copy,mp_copy_copy;
 
-    mp.begin();
-    mp.end();
+    mp.insert({"abckasd",123});
+    cout<< mp.begin()->first << mp.begin()->second<<endl;
 
-    mp.count("123");
-    mp.empty();
+//     mp.begin();
+//     mp.end();
 
-    //马天野 : 查找功能。
-    mp.equal_range("123");
-    mp.lower_bound("123");
-    mp.upper_bound("123");
-    mp.find("123");
-    mp.swap(mp_copy);
-   //mp.get_rank("123");
-   // mp.get_val(123);
-    mp["123"]=123;
+//     mp.count("123");
+//     mp.empty();
 
-    //马润豪 : 删除
-    mp.erase("123");
-    mp.erase(mp.begin(),mp.end());
-    mp.erase(mp.begin());
-    mp.clear();
+//     //马天野 : 查找功能。
+//     mp.equal_range("123");
+//     mp.lower_bound("123");
+//     mp.upper_bound("123");
+//     mp.find("123");
+//     mp.swap(mp_copy);
+//    //mp.get_rank("123");
+//    // mp.get_val(123);
+//     mp["123"]=123;
 
-    mp.max_size();
-    mp.size();
+//     //马润豪 : 删除
+//     mp.erase("123");
+//     mp.erase(mp.begin(),mp.end());
+//     mp.erase(mp.begin());
+//     mp.clear();
 
-    mp.insert({"123",123});
-    mp.insert(mp.begin(),{"123",123});
-    mp.insert(mp.end(),{"111",111});
-    mp.insert(mp.begin(),{"321",312});
+//     mp.max_size();
+//     mp.size();
+
+//     mp.insert({"123",123});
+//     mp.insert(mp.begin(),{"123",123});
+//     mp.insert(mp.end(),{"111",111});
+//     mp.insert(mp.begin(),{"321",312});
     
-    for(auto&it:mp)
-    {
-        cout<<it.first<<' '<<it.second<<endl;
-    }
+//     for(auto&it:mp)
+//     {
+//         cout<<it.first<<' '<<it.second<<endl;
+//     }
 
-    mp=mp_copy;
-    mp==mp_copy;
-    mp!=mp_copy;
+//     mp=mp_copy;
+//     mp==mp_copy;
+//     mp!=mp_copy;
     
-    auto it=mp.begin();
+//     auto it=mp.begin();
     
     cout<<endl;
     system("pause");

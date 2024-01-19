@@ -38,7 +38,7 @@ struct rb_tree_node_base
 
     rb_tree_node_base():node_count(1){}
 
-    ////TODO:新版C++stl标准增加了const类型的，暂时不知道有什么用
+    ////TODO:新版C++ stl标准增加了const类型的，暂时不知道有什么用
     static base_ptr get_min(base_ptr x)
     {
         while(x->left!=nullptr)x=x->left;
@@ -156,9 +156,11 @@ struct rb_tree_iterator
 
 protected:
 
-    base_ptr M_node;//指针
+    base_ptr M_node;//指针，但是存储的是 rb_tree_node_base的指针，而不是rb_tree_node
+    //可是 rb_tree_node 是继承与 rb_tree_node_base，每一个rb_tree_node里面都有rb_tree_base_node和value
+    //所以用指针指向rb_tree_node_base 之后用类型转换可以访问value
 
-//比起第一版本，这里改成了get_M_node函数获取，更加统一。
+//比起第一版本，这里改成了get_M_node函数获取，更加统一。，友元friend
 template<typename Key,typename V,typename KeyOfValue,typename Compare>
 friend  typename Rb_tree<Key,V,KeyOfValue,Compare>::Base_ptr&
         Rb_tree<Key,V,KeyOfValue,Compare>::
@@ -538,7 +540,7 @@ rb_tree_rebalance_for_erase(rb_tree_node_base*z,
         y=z;
         // __y now points to node to be actually deleted
     }
-    else//z本身就只剩一个孩子,所以y==z
+    else //z本身就只剩一个孩子,所以y==z
     {
         x_parent=y->parent;
         if(x!=nullptr)x->parent=y->parent;
@@ -692,7 +694,7 @@ struct rb_tree_base
     ~rb_tree_base(){M_put_node(M_header);}
 
     protected:
-        rb_tree_node<Value>* M_header;
+        rb_tree_node<Value>* M_header;//头指针
 
         rb_tree_node<Value>* M_get_node(const Value &v)
         {
@@ -812,10 +814,8 @@ protected:
   static Link_type S_maximum(Link_type __x)
     { return (Link_type) rb_tree_node_base::get_max(__x); }
 
-
 public:
     typedef rb_tree_iterator<value_type> iterator;
-
 private:
     iterator M_insert(Base_ptr x,Base_ptr y,const value_type& v);
     Link_type M_copy(Link_type x,Link_type p);
@@ -972,9 +972,6 @@ M_insert(Base_ptr a,Base_ptr b,const value_type & v)
     //x是新值插入点，y是x的父节点，v是插入值,z是新节点。
     Link_type x=(Link_type)a,y=(Link_type)b,z=nullptr;
 
-    ///TODO:这里if语句应当总为ture
-    //v总小于y的value？
-
     if(y==this->M_header||x!=nullptr||
         M_key_compare(KeyOfValue()(v),S_key(y)))
     {
@@ -1011,6 +1008,7 @@ void
 Rb_tree<Key,Value,KeyOfValue,Compare>::
 M_erase(Link_type x)
 //删除子树，这是没有平衡的直接删除，应当只在clear函数中调用。
+//很巧妙，用while循环降低了递归深度。
 {
     //后序遍历，
     while(x!=nullptr)
@@ -1022,6 +1020,8 @@ M_erase(Link_type x)
     }
 }
 
+
+//允许重复值插入。
 template<typename Key,typename Value,typename KeyOfValue,typename Compare>
 typename Rb_tree<Key,Value,KeyOfValue,Compare>::iterator
 Rb_tree<Key,Value,KeyOfValue,Compare>::
@@ -1040,6 +1040,7 @@ insert_equal(const Value&v)
     return M_insert(x,y,v);
 }
 
+//不允许重复值插入，所以需要进行判断。
 template<typename Key,typename Value,typename KeyOfValue,typename Compare>
 std::pair<typename Rb_tree<Key,Value,KeyOfValue,Compare>::iterator,bool>
 Rb_tree<Key,Value,KeyOfValue,Compare>::
@@ -1057,24 +1058,24 @@ insert_unique(const Value&v)
 
     iterator j=iterator(y);//j为插入节点的父节点
 
-    //true表示插入父亲节点的左边。
+    //true表示插入父亲节点的左边。。
     if(comp)
     {
-        //如果j是begin，那么应该直接插入，不能在减--j
+        //如果j是begin，但v小于j，那么肯定没有重复，直接插入。
         if(j==begin())
             return std::pair<iterator,bool>(M_insert(x,y,v),true);
         else
-            --j;
+            --j;//移动到了j前一个。为了判断 v 是否已存在：现在已经得出 j > v的结论，如果
+                //下面出现 j-1 < v的话，那么可以插入，也即v在j和j-1之间；但如果 j-1 >= v,这不合理，说明j-1必然=v，因此拒绝再插入   
     }
 
     //分析一下：
-    //1.M_key_compare重载的应该是小于号
-    //2.x指向要么等于j，要么在j的右节点。
-    //3.这个if语句继续进行比较的是j和和x
+    //1.假设M_key_compare重载的是小于号
+    //2.x指向nullptr，y指向插入节点的父亲
+    //3.下面这个if语句继续进行比较的是j和v
     
     //综上
-    //1.如果if通过，要么x和j指向相同同时j小于x，要么x在j的右节点同时j小于x
-    //2.显然前者排除，所以得出结论，如果执行if，必然是x在j的右节点，同时两者值不同。
+    // 经过上面if的处理，现在 j必然<=v,那么如果 j<v，插入即可；如果不是，则说明j==v
 
     if(M_key_compare(KeyOfValue()(*j),KeyOfValue()(v)))
         return std::pair<iterator,bool>(M_insert(x,y,v),true);
@@ -1196,7 +1197,7 @@ erase(const Key&x)
 template<typename Key,typename Value,typename KeyOfValue,typename Compare>
 typename Rb_tree<Key,Value,KeyOfValue,Compare>::Link_type
 Rb_tree<Key,Value,KeyOfValue,Compare>::
-M_copy(Link_type x,Link_type p)//拷贝一个子树。使用递归算法。
+M_copy(Link_type x,Link_type p)//拷贝一个子树。使用递归算法。但是也使用了while降低了递归深度。
 {
     Link_type top=M_clone_node(x);
     top->parent=p;
@@ -1266,7 +1267,7 @@ find(const key_type&k)
     iterator j=iterator(y);
 
     //j如果是end，显然直接返回end，
-    //所求j应该>=k,如果k<j取真，说明 j>k 不存在k这个节点，
+    //所求j应该>=k,如果k<j取真，说明 j>k 不存在k这个节点。。。。
     return (j==end()||M_key_compare(k,KeyOfValue()(*j)))?
         end():j;
 }

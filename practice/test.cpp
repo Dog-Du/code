@@ -1,33 +1,25 @@
-#include <iostream>
+#include<iostream>
+#include <list>
+#include<string>
+#include <vector>
+#include <random>
+#include <algorithm>
+#include <ctime>
 
+template<typename X>
+void print(const X&x,const std::string&end="\n")
+{
+	std::cout<<x<<end;
+}
 
-class myint{
-public:
-    int a;
-    myint():a(1){}
-
-    void print()const
-    {
-        std::cout<<a<<std::endl;
-    }
-
-    const int& get()const
-    {
-        return a;
-    }
-
-    void set(int x)
-    {
-        a=x;
-    }
-};
 int main()
 {
 	std::ios::sync_with_stdio(false);
 	std::cout.tie(0),std::cin.tie(0);
 
-
-	std::cout<<std::endl;
+	std::random_device seed;
+	std::minstd_rand rng(seed());
+	
 	system("pause");
 	return 0;
 }

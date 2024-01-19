@@ -17,7 +17,7 @@ namespace MyGraph
     private:
         typedef unsigned long long size_t;
 
-        vector<set<size_t>> graph;//为了防止输入重复边，使用set.
+        vector<set<size_t>> graph;//为了防止输入重复边，使用set.一个简易的邻接表。
         size_t arcnum;
     public:
         my_graph(size_t x):arcnum(0){graph.resize(x+1);}
