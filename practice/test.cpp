@@ -1,26 +1,26 @@
 #include<iostream>
 #include <list>
-#include<string>
+#include <string>
 #include <vector>
 #include <random>
 #include <algorithm>
+#include <map>
 #include <ctime>
 
 using namespace std;
 
-template<typename X>
-void print(const X&x,const std::string&end="\n")
+int func(int x,int y)
 {
-	std::cout<<x<<end;
+	return x+y;
 }
+
 
 int main()
 {
-	double num3;
-	double accuracy;
-
-	cout<< num3.AlmostEqualNormRelative(0.0,num3,accuracy);
+	int (*a)(int,int)=func;
+	cout<<a(1,2)<<endl;
 	
+
 	system("pause");
 	return 0;
 }
