@@ -12,7 +12,7 @@ using namespace std;
 
 const int maxn=1e5+10;
 
-vector<int> graph[maxn];
+vector<int> graph[maxn];//邻接表
 
 struct NODE{
     int fa,son,node_count,depth;

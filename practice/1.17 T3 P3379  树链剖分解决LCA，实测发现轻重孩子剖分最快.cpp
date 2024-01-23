@@ -13,8 +13,8 @@ using namespace std;
 const int maxn=500000+10;
 
 vector<int> graph[maxn];
-int n,m,root,tim=0;
-int dfn[maxn],top[maxn],fa[maxn],son[maxn],node_count[maxn],depth[maxn];
+int n,m,root;
+int top[maxn],fa[maxn],son[maxn],node_count[maxn],depth[maxn];
 
 void dfs1(int now,int f)
 {
@@ -41,7 +41,6 @@ void dfs1(int now,int f)
 
 void dfs2(int now,int t)
 {
-    dfn[now]=++tim;
     top[now]=t;
 
     if(son[now]==0)

@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <ctime>
 
+using namespace std;
+
 template<typename X>
 void print(const X&x,const std::string&end="\n")
 {
@@ -14,11 +16,10 @@ void print(const X&x,const std::string&end="\n")
 
 int main()
 {
-	std::ios::sync_with_stdio(false);
-	std::cout.tie(0),std::cin.tie(0);
+	double num3;
+	double accuracy;
 
-	std::random_device seed;
-	std::minstd_rand rng(seed());
+	cout<< num3.AlmostEqualNormRelative(0.0,num3,accuracy);
 	
 	system("pause");
 	return 0;
