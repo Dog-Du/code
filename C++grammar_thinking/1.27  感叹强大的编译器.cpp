@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <map>
 #include <ctime>
-#include <new>
 #include <shared_mutex>
 
 using namespace std;
@@ -60,22 +59,21 @@ struct a2{
 	~a2(){cout<<"a2 destory!!!!!!"<<this<<endl;}
 };
 
+void func(a1 x,a2 y,a2 z,a1 w,a2 v)
+{
+
+}
+
 class A{
 public:
 	int x;
 	virtual void func() const{cout<<"A!!!!!!"<<this<<x<<endl;}
-protected:
-	int z;
 };
 
-class B:private A{
+class B:public A{
 public:
 	int y;
 	virtual void func() const{cout<<"B!!!!!!"<<this<<A::x<<y<<endl;}
-	void gunc()
-	{
-		A::z=10;
-	}
 };
 
 void display(const A& a)
@@ -85,118 +83,36 @@ void display(const A& a)
 
 class Rational{
 public:
-	Rational(int numerator=0,int denominator=1):n(numerator),d(denominator){}
-	int numerator()const{return n;}
-	int denominator()const{return d;}
-private:
+	Rational(int numerator=0,int denominator=1):n(numerator),d(denominator){cout<<"Rational!!!!!!"<<this<<endl;}
+	Rational(const Rational &rhs):n(rhs.n),d(rhs.d){cout<<"const Rational!!"<<endl;}
+	Rational(Rational&& rhs):n(rhs.n),d(rhs.d){cout<<"&& Rational!!!"<<endl;}
+	~Rational(){cout<<"~Rational!!!!!!"<<this<<endl;}
+
 	int n,d;
-};
+	Rational& operator=(const Rational& rhs);
+	Rational& operator=(Rational&& rhs);
 
-template<typename T>
-class C{
-public:
-	void swap(C<T>&rhs){}
-};
-
-template<typename T>
-void std::swap(C<T>& lhs,C<T>& rhs)
-{
-	cout<<"std::swap!!!!!!"<<endl;
-	lhs.swap(rhs);
-}
-
-template<typename T>
-void swap(C<T>& lsh,C<T>& rsh)
-{
-	cout<<"111111"<<endl;
-}
-
-struct D{
-	int x;
-	explicit D(int X):x(X){}
-};
-
-void gunc(double ,int )
-{
-	cout<<"double int"<<endl;
-}
-
-void gunc(int ,double )
-{
-	cout<<"int double"<<endl;
-}
-
-struct E{
-	int x;
-	virtual void func()
+    //按道理讲res是一个local变量，之后应该会被销毁，但是下面有一个构造语句。
+    //因此虽然返回值是一个Rational，但是c的地址和res的地址一样，然后构造函数也没有调用
+    //合理的解释是：c接管了res，减少了一次构造，一次析构，强大的编译器。
+	const Rational operator*(const Rational& rhs)
 	{
-		cout<<"E::func()"<<endl;
+		Rational res(n*rhs.n,d*rhs.d);
+		cout<<"operator*!!!!!"<<endl;
+		return res;
 	}
-};
-
-struct F:public E{
-	void func()
-	{
-		cout<<"F::func()"<<endl;
-	}
-};
-
-class G final{
-public:
-	static void func(int ){cout<<"G::func()";}
-private:
-	static int x;
-	G();
-	~G();
-};
-
-void func(){cout<<"func!"<<endl;}
-
-auto gunc()
-{
-	return []()->void
-	{
-		func();
-		cout<<"lamaba function calling"<<endl;
-	};
-}
-
-template<typename T>
-auto punc(T t)
-{
-	t();
-}
-
-template<unsigned n>
-struct Factorial{
-	enum{ value = n* Factorial<n-1>::value };
-};
-
-template<>
-struct Factorial<0>{
-	enum{ value = 1 };
-};
-
-class H{
-public:
-	int x[100000];
-	H(){throw 1;}
 };
 
 
 int main()
 {	
-	cout<<sizeof(H)<<endl;
-	while(1)
 	{
-		try{
-			H*p=new H;
-		}
-		catch(...)
-		{
-
-		}
+	Rational a,b;
+	Rational c(a*b);
+    a*b;
+	cout<<c.n<<c.d<<' '<<&c<<endl;
 	}
+
 	system("pause");
 	return 0;
 }

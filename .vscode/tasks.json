@@ -6,7 +6,7 @@
             "command": "D:\\Program Files (x86)\\x86_64-13.2.0-release-win32-seh-msvcrt-rt_v11-rev1\\mingw64\\bin\\g++.exe",
             "args": [
                 "-fdiagnostics-color=always",
-                "-std=c++2a",
+                "-std=c++23",
                 "-g",
                 "-DLOCAL",
                 "${file}",

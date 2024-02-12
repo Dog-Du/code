@@ -11,6 +11,13 @@ using namespace std;
 vector<int> vec;
 int n;
 
+
+
+void quicksort(int *first,int *last)
+{
+
+}
+
 //这种quicksort写法算是原教义quicksort了，
 //每次能都保证pivot在应该在的位置。
 

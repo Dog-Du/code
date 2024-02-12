@@ -1,0 +1,6 @@
+C++中继承不影响dervied class ，dervied均可访问父类的protected和public
+只影响继承之后的属性：
+public:不影响父类的属性
+protected:把父类的public全部改成protected
+private：把父类的protected和public全部改成private.
+需要注意的是，protected并不比public多封装多少。、

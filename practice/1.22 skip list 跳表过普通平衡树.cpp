@@ -24,7 +24,7 @@ struct Node{
         nodePointer():span(0),pointer(nullptr){}//让它新建的时候为空。
         nodePointer(Node*x):span(0),pointer(x){}
         Node*operator->(){return pointer;}
-        operator Node*(){return pointer;}
+        operator Node*(){return pointer;}//隐式类型转化
     }*next;//一个节点在生成的时候已经决定了它的level，这个是不会在改变的
 
     ~Node(){delete [] next;}//析构时删除next数组
@@ -212,7 +212,6 @@ int main()
             case 6:cout<< next(x)->key <<'\n';break;
         }
     }
-
 
 //-------------------------------------------------
 
